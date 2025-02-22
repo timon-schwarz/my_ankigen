@@ -8,18 +8,23 @@ class TsTableParser(FlashcardParser):
     def __init__(
         self,
         cloze_formatter: Optional[Callable[..., str]] = None,
+        header_formatter: Optional[Callable[..., str]] = None,
         mask_generator: Optional[MaskGenerator] = None
     ) -> None:
         """
-        Initialize the TsTableParser with an optional cloze formatter and mask generator.
-        The cloze_formatter can accept any parameters, but must return a string.
-        If no formatter is provided, the default Anki cloze pattern is used.
+        Initialize the TsTableParser.
+        If no formatter is provided, the default is used.
         If no mask_generator is provided, the default RowColumnMaskGenerator is used.
         """
         if cloze_formatter is None:
             self.cloze_formatter = self.default_cloze_formatter
         else:
             self.cloze_formatter = cloze_formatter
+
+        if header_formatter is None:
+            self.header_formatter = self.default_header_formatter
+        else:
+            self.header_formatter = cloze_formatter
 
         if mask_generator is None:
             self.mask_generator = RowColumnMaskGenerator()
@@ -33,21 +38,35 @@ class TsTableParser(FlashcardParser):
         """
         return f"[...]"
 
+    def default_header_formatter(self, text: str) -> str:
+        """
+        Default header formatter that simply adds a span html tag with the card_header class.
+        """
+        return f'<span class="card_header">{text}</span>'
+
+    def add_card_header(self, header: str, content: str) -> str:
+        """
+        Applies the header_formatter to the header then prepends it to the content.
+        """
+        return "\n".join([self.header_formatter(header), content])
+
+
     def parse(self, markdown_content: str, metadata: FlashcardMetadata) -> List[Flashcard]:
         """
         Parse the markdown table from the provided content, generate multiple flashcards
         by applying cloze deletions (via masks) to each row and each column, and return
         the list of flashcards.
         """
+        card_header = self.header_formatter(metadata.name)
         table = self.parse_markdown_table(markdown_content)
-        full_table_string = self.format_table(table)
+        full_card_string = self.add_card_header(metadata.name, self.format_table(table))
         masks = self.mask_generator.generate_masks(table)
         flashcards: List[Flashcard] = []
         # For each generated mask, apply cloze formatting to create a flashcard.
         for mask in masks:
-            masked_table = self.apply_mask(table, mask, cloze_index=1)
-            masked_table_string = self.format_table(masked_table)
-            flashcards.append(Flashcard(front=masked_table_string, back=full_table_string, metadata=metadata))
+            masked_table = self.apply_mask(table, mask)
+            masked_card_string = self.add_card_header(metadata.name, self.format_table(masked_table))
+            flashcards.append(Flashcard(front=masked_card_string, back=full_card_string, metadata=metadata))
         return flashcards
 
     def parse_markdown_table(self, content: str) -> List[List[str]]:
@@ -91,9 +110,11 @@ class TsTableParser(FlashcardParser):
             html_lines.append("    <tr>")
             for j, cell in enumerate(row):
                 classes = ["table_body"]
-                if i == 0:
+                if i == 0 and j == 0:
+                    classes.append("table_corner")
+                elif i == 0:
                     classes.append("table_header_top")
-                if j == 0:
+                elif j == 0:
                     classes.append("table_header_left")
                 class_attr = " ".join(classes)
                 html_lines.append(f'      <td class="{class_attr}">{cell}</td>')
@@ -107,7 +128,6 @@ class TsTableParser(FlashcardParser):
         self,
         table: List[List[str]],
         mask: List[List[MaskInfo]],
-        cloze_index: int = 1
     ) -> List[List[str]]:
         """
         Apply the given mask to the table.
