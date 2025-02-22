@@ -8,13 +8,29 @@ class CellFormat(Enum):
 
 @dataclass
 class FlashcardMetadata:
+    name: str
     deck: str
+    note_type: str
 
 @dataclass
 class Flashcard:
     front: str
     back: str
     metadata: FlashcardMetadata
+    def to_string(self) -> str:
+        """
+        Return a string representation of the flashcard.
+        """
+        lines = [
+            f"Name: {self.metadata.name}",
+            f"Deck: {self.metadata.deck}",
+            f"Note Type: {self.metadata.note_type}",
+            "Front:",
+            f"{self.front}",
+            "Back:",
+            f"{self.back}"
+        ]
+        return "\n".join(lines)
 
 
 @dataclass
