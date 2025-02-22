@@ -1,13 +1,14 @@
 import os
 import logging
 import frontmatter
+from pathlib import Path
 from typing import List
 from dotenv import load_dotenv
 from parser.get_parser import get_parser
-from parser.models import Flashcard
-from utils import print_flashcards
+from parser.models import Flashcard, FlashcardMetadata
+from deck_builder.deck_builder import build_anki_package
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 
 def get_markdown_files(root_folder: str) -> List[str]:
@@ -31,25 +32,23 @@ def process_flashcards(flashcards_folder: str) -> List[Flashcard]:
         metadata = post.metadata
         content: str = post.content
 
+        name = Path(md_file).stem
         deck = metadata.get('deck')
         if not isinstance(deck, str):
             logging.warning(f"File '{md_file}' must have a 'deck' field of type str. Skipping file.")
             continue
-
         note_type = metadata.get('note_type')
         if not isinstance(note_type, str):
             logging.warning(f"File '{md_file}' must have a 'note_type' field of type str. Skipping file.")
             continue
+        flashcard_metadata = FlashcardMetadata(name=name, deck=deck, note_type=note_type)
 
         parser = get_parser(note_type)
         if parser is None:
             logging.warning(f"Unknown note type '{note_type}' in file {md_file}. Skipping file.")
             continue
 
-        flashcards_from_file = parser.parse(content, metadata)
-        for flashcard in flashcards_from_file:
-            flashcard.deck = deck
-            flashcards.append(flashcard)
+        flashcards = parser.parse(content, flashcard_metadata)
 
     return flashcards
 
@@ -62,4 +61,9 @@ if __name__ == '__main__':
     cards = process_flashcards(FLASHCARDS_FOLDER)
 
     for card in cards:
-        print_flashcards(cards)
+        logging.debug("\n" + card.to_string())
+
+    parent_deck_name = "my_ankigen"
+    output_file = "my_ankigen.apkg"
+    build_anki_package(cards, parent_deck_name, output_file)
+    logging.info(f"APKG file generated: {output_file}")
