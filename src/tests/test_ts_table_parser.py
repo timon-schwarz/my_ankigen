@@ -1,6 +1,6 @@
 import unittest
 from parser.ts_table_parser import TsTableParser
-from parser.models import Flashcard
+from parser.models import Flashcard, FlashcardMetadata
 from parser.mask_generator import RowColumnMaskGenerator
 
 class TestTsTableParser(unittest.TestCase):
@@ -61,7 +61,7 @@ class TestTsTableParser(unittest.TestCase):
         # Test that applying a mask cloaks only the targeted row.
         masks = self.parser.mask_generator.generate_masks(self.expected_table)
         first_mask = masks[0]  # Assume this mask cloaks the first row.
-        masked_table = self.parser.apply_mask(self.expected_table, first_mask, cloze_index=1)
+        masked_table = self.parser.apply_mask(self.expected_table, first_mask)
         # The first row should contain cloze syntax.
         for j, cell in enumerate(masked_table[0]):
             if j == 0:
@@ -80,7 +80,7 @@ class TestTsTableParser(unittest.TestCase):
         parser_custom = TsTableParser(cloze_formatter=custom_formatter)
         masks = parser_custom.mask_generator.generate_masks(self.expected_table)
         first_mask = masks[0]
-        masked_table = parser_custom.apply_mask(self.expected_table, first_mask, cloze_index=2)
+        masked_table = parser_custom.apply_mask(self.expected_table, first_mask)
         # Verify that the custom formatter's pattern is present.
         for j, cell in enumerate(masked_table[0]):
             if j == 0:
@@ -90,7 +90,7 @@ class TestTsTableParser(unittest.TestCase):
     
     def test_parse_method_output(self):
         # Test the overall parse method.
-        metadata = {"note_type": "ts_table", "deck": "TestDeck"}
+        metadata = FlashcardMetadata("Test", "ts_table", "TestDeck")
         flashcards = self.parser.parse(self.markdown_table, metadata)
         # For our table (3x3), expect 3 row masks + 3 column masks = 6 flashcards.
         self.assertEqual(len(flashcards), 6)
@@ -98,6 +98,9 @@ class TestTsTableParser(unittest.TestCase):
             self.assertIsInstance(card, Flashcard)
             self.assertTrue(card.front)
             self.assertTrue(card.back)
+            self.assertTrue(card.metadata.name)
+            self.assertTrue(card.metadata.note_type)
+            self.assertTrue(card.metadata.deck)
         # All flashcards should have the same full table as the answer.
         backs = {card.back for card in flashcards}
         self.assertEqual(len(backs), 1)
