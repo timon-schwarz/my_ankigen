@@ -90,7 +90,7 @@ class TestTsTableParser(unittest.TestCase):
     
     def test_parse_method_output(self):
         # Test the overall parse method.
-        metadata = FlashcardMetadata("Test", "ts_table", "TestDeck")
+        metadata = FlashcardMetadata(unique_id="1-195322b0c4c-a1bc2", name="Test", note_type="ts_table", deck="TestDeck")
         flashcards = self.parser.parse(self.markdown_table, metadata)
         # For our table (3x3), expect 3 row masks + 3 column masks = 6 flashcards.
         self.assertEqual(len(flashcards), 6)

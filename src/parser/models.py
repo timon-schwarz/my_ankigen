@@ -8,6 +8,7 @@ class CellFormat(Enum):
 
 @dataclass
 class FlashcardMetadata:
+    unique_id: str
     name: str
     deck: str
     note_type: str
@@ -22,6 +23,7 @@ class Flashcard:
         Return a string representation of the flashcard.
         """
         lines = [
+            f"ID: {self.metadata.unique_id}",
             f"Name: {self.metadata.name}",
             f"Deck: {self.metadata.deck}",
             f"Note Type: {self.metadata.note_type}",

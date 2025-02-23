@@ -33,15 +33,23 @@ def process_flashcards(flashcards_folder: str) -> List[Flashcard]:
         content: str = post.content
 
         name = Path(md_file).stem
+
+        unique_id = metadata.get('unique_id')
+        if not isinstance(unique_id, str):
+            logging.warning(f"File '{md_file}' must have a 'unique_id' field of type str. Skipping file.")
+            continue
+
         deck = metadata.get('deck')
         if not isinstance(deck, str):
             logging.warning(f"File '{md_file}' must have a 'deck' field of type str. Skipping file.")
             continue
+
         note_type = metadata.get('note_type')
         if not isinstance(note_type, str):
             logging.warning(f"File '{md_file}' must have a 'note_type' field of type str. Skipping file.")
             continue
-        flashcard_metadata = FlashcardMetadata(name=name, deck=deck, note_type=note_type)
+
+        flashcard_metadata = FlashcardMetadata(unique_id=unique_id, name=name, deck=deck, note_type=note_type)
 
         parser = get_parser(note_type)
         if parser is None:

@@ -53,6 +53,7 @@ def build_anki_package(flashcards: List[Flashcard], parent_deck_name: str, outpu
             model = note_type_instance.create_model()
             
             note = genanki.Note(
+                guid=card.metadata.unique_id,
                 model=model,
                 fields=[card.front, card.back]
             )
