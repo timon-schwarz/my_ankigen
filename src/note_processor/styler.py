@@ -29,6 +29,15 @@ def add_card_header(header: str, content: str) -> str:
     return "\n".join([f'<span class="card_header">{header}</span>', content])
 
 
+def add_hints(hints: List[str], content: str) -> str:
+    """
+    Appends the hints to the content.
+    """
+    hints_raw = "\n".join(hints)
+    hints_formatted = "\n".join(['<div class="hints">', hints_raw, "</div>"])
+    return "\n".join([content, hints_formatted])
+
+
 def render_table(table: List[List[str]]) -> str:
     """
     Format a 2D list of strings as an HTML table.

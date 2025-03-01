@@ -1,4 +1,5 @@
-from dataclasses import Field, dataclass
+from dataclasses import dataclass, field
+from typing import List
 from deck_builder.note_types import BaseNoteType
 
 
@@ -9,6 +10,7 @@ class NoteMetadata:
     deck: str
     parser: str
     masker: str
+    hints: List[str] = field(default_factory=list)
 
 
 @dataclass(slots=True, kw_only=True)

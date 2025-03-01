@@ -63,8 +63,15 @@ def generate_flashcards(flashcards_folder: str) -> List[Flashcard]:
             )
             continue
 
+        hints = note_metadata.get("hints")
+        if not isinstance(hints, list):
+            if isinstance(hints, str):
+                hints = [hints]
+            else:
+                hints = []
+
         note_metadata = NoteMetadata(
-            id=id, name=name, deck=deck, parser=parser, masker=masker
+            id=id, name=name, deck=deck, parser=parser, masker=masker, hints=hints
         )
         flashcards = processor.process(content, note_metadata)
 

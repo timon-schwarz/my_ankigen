@@ -35,6 +35,12 @@ BASE_CSS = """
   text-align: center;         /* Center the header text itself */
 }
 
+.hints {
+  color: #b7bdf8;             /* Lavender */
+  margin-top: 32px;           /* Top margin */
+  white-space: pre-wrap;
+}
+
 .masked, .unmasked, .code {
   font-family: 'Inconsolata', monospace;
 }

@@ -12,10 +12,14 @@ def build(
     cards: List[Flashcard] = []
     counter = 0
     for masked_table, unmasked_table in zip(masked_tables, unmasked_tables):
-        unmasked_string = styler.render_table(unmasked_table)
-        masked_string = styler.render_table(masked_table)
-        front = styler.add_card_header(note_metadata.name, masked_string)
-        back = styler.add_card_header(note_metadata.name, unmasked_string)
+        front = styler.render_table(masked_table)
+        front = styler.add_card_header(note_metadata.name, front)
+        front = styler.add_hints(note_metadata.hints, front)
+
+        back = styler.render_table(unmasked_table)
+        back = styler.add_card_header(note_metadata.name, back)
+        back = styler.add_hints(note_metadata.hints, back)
+
         # TODO: Differentiate note types
         flashcard_metadata = FlashcardMetadata(
             id=note_metadata.id + f"-{counter}",
