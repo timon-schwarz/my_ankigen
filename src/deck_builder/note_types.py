@@ -262,7 +262,7 @@ table {
 
 th, td {
   border: 2px solid #6e738d; /* Overlay0 */
-
+  white-space: pre-wrap;
 }
 
 .table_body {
@@ -270,18 +270,17 @@ th, td {
   padding: 12px;
   background-color: #494d64; /* Surface1 */
 }
+
 .table_corner {
   border: none;               /* no explicit border on the table itself */
   background-color: #24273a;  /* Base */
 }
 
-/* Row Header cells styling */
 .table_header_top {
   text-align: center;
   background-color: #363a4f; /* Surface0 */
 }
 
-/* Column Header cells styling */
 .table_header_left {
   text-align: right;
   background-color: #363a4f; /* Surface0 */

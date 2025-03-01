@@ -28,7 +28,7 @@ class TableParser(Parser):
         for tr in table_tag.find_all("tr"):
             # Collect text from header (<th>) and data (<td>) cells.
             cells = tr.find_all(["th", "td"])
-            row = [cell.get_text(strip=True) for cell in cells]
+            row = [cell.get_text(separator="\n", strip=True) for cell in cells]
             table.append(row)
         tables = []
         tables.append(table)
