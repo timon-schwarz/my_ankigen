@@ -27,25 +27,173 @@ BASE_CSS = """
 }
 
 .card_header {
-  color: #b7bdf8             /* Lavender */
-  font-size: 48px;
+  color: #b7bdf8;             /* Lavender */
+  font-size: 24px;
   font-weight: bold;
   display: table;             /* Allows margin auto to center horizontally */
   margin: 0 auto 32px auto;   /* Center horizontally, plus bottom margin */
   text-align: center;         /* Center the header text itself */
 }
 
-/* Code styling */
-.code {
-  font-family: 'Consolas', 'Courier New', monospace;
+.masked, .unmasked, .code {
+  font-family: 'Inconsolata', monospace;
 }
 """
+
+RANDOMIZE_TABLE_COLUMS_QUESTION_SCRIPT = """
+<script>
+(function() {
+    // Generate and store random seed
+    var storageKey = "randomSeed"
+    storedSeed = Date.now();
+    storedSeed = parseInt(storedSeed, 10);
+    localStorage.setItem(storageKey, storedSeed);
+
+    // Simple linear congruential generator (LCG) for seeded randomness.
+    function seededRandom(seed) {
+        var m = 0x80000000; // 2^31
+        var a = 1103515245;
+        var c = 12345;
+        seed = (a * seed + c) % m;
+        return { value: seed / m, seed: seed };
+    }
+
+    // Deterministically shuffle an array using the seed.
+    function shuffleArray(array, seed) {
+        var newArray = array.slice();
+        for (var i = newArray.length - 1; i > 0; i--) {
+            var rnd = seededRandom(seed);
+            seed = rnd.seed;
+            var j = Math.floor(rnd.value * (i + 1));
+            var temp = newArray[i];
+            newArray[i] = newArray[j];
+            newArray[j] = temp;
+        }
+        return newArray;
+    }
+
+    // Find the table by its class.
+    var table = document.querySelector("table");
+    if (!table) return;
+    var firstRow = table.rows[0];
+    if (!firstRow) return;
+    var colCount = firstRow.cells.length;
+    if (colCount <= 1) return;
+
+    // Create an array of column indices to shuffle (excluding the first column).
+    var indices = [];
+    for (var i = 1; i < colCount; i++) {
+        indices.push(i);
+    }
+    // Shuffle deterministically using the stored seed.
+    var shuffledIndices = shuffleArray(indices, storedSeed);
+
+    // Apply the permutation to each row.
+    for (var r = 0; r < table.rows.length; r++) {
+        var row = table.rows[r];
+        var firstCell = row.cells[0]; // leave first column as-is.
+        var otherCells = [];
+        for (var c = 1; c < colCount; c++) {
+            otherCells.push(row.cells[c]);
+        }
+        var newCells = [firstCell];
+        shuffledIndices.forEach(function(idx) {
+            // Since idx is the original cell index (starting at 1), subtract 1 for our otherCells.
+            newCells.push(otherCells[idx - 1]);
+        });
+        // Clear and reappend cells in new order.
+        while (row.firstChild) {
+            row.removeChild(row.firstChild);
+        }
+        newCells.forEach(function(cell) {
+            row.appendChild(cell);
+        });
+    }
+})();
+</script>
+"""
+
+RANDOMIZE_TABLE_COLUMS_ANSWER_SCRIPT = """
+<script>
+(function() {
+    // Load random seed from question
+    var storageKey = "randomSeed"
+    var storedSeed = localStorage.getItem(storageKey);
+    storedSeed = parseInt(storedSeed, 10);
+
+    // Simple linear congruential generator (LCG) for seeded randomness.
+    function seededRandom(seed) {
+        var m = 0x80000000; // 2^31
+        var a = 1103515245;
+        var c = 12345;
+        seed = (a * seed + c) % m;
+        return { value: seed / m, seed: seed };
+    }
+
+    // Deterministically shuffle an array using the seed.
+    function shuffleArray(array, seed) {
+        var newArray = array.slice();
+        for (var i = newArray.length - 1; i > 0; i--) {
+            var rnd = seededRandom(seed);
+            seed = rnd.seed;
+            var j = Math.floor(rnd.value * (i + 1));
+            var temp = newArray[i];
+            newArray[i] = newArray[j];
+            newArray[j] = temp;
+        }
+        return newArray;
+    }
+
+    // Find the table by its class.
+    var table = document.querySelector("table");
+    if (!table) return;
+    var firstRow = table.rows[0];
+    if (!firstRow) return;
+    var colCount = firstRow.cells.length;
+    if (colCount <= 1) return;
+
+    // Create an array of column indices to shuffle (excluding the first column).
+    var indices = [];
+    for (var i = 1; i < colCount; i++) {
+        indices.push(i);
+    }
+    // Shuffle deterministically using the stored seed.
+    var shuffledIndices = shuffleArray(indices, storedSeed);
+
+    // Apply the permutation to each row.
+    for (var r = 0; r < table.rows.length; r++) {
+        var row = table.rows[r];
+        var firstCell = row.cells[0]; // leave first column as-is.
+        var otherCells = [];
+        for (var c = 1; c < colCount; c++) {
+            otherCells.push(row.cells[c]);
+        }
+        var newCells = [firstCell];
+        shuffledIndices.forEach(function(idx) {
+            // Since idx is the original cell index (starting at 1), subtract 1 for our otherCells.
+            newCells.push(otherCells[idx - 1]);
+        });
+        // Clear and reappend cells in new order.
+        while (row.firstChild) {
+            row.removeChild(row.firstChild);
+        }
+        newCells.forEach(function(cell) {
+            row.appendChild(cell);
+        });
+    }
+})();
+</script>
+"""
+
 
 class BaseNoteType:
     """
     Base class for Anki note types.
     """
-    def __init__(self, model_id: int, name: str, fields: list, templates: list, css: str = ""):
+
+    def __init__(
+        self, model_id: int, name: str, fields: list, templates: list, css: str = ""
+    ):
         self.model_id = model_id
         self.name = name
         self.fields = fields
@@ -58,42 +206,47 @@ class BaseNoteType:
             self.name,
             fields=self.fields,
             templates=self.templates,
-            css=self.css
+            css=self.css,
         )
 
-class TsTableNoteType(BaseNoteType):
+
+class TableNoteType(BaseNoteType):
     """
     A basic note type for ts_table flashcards.
-    
+
     - Front: rendered as HTML.
     - Back: rendered as HTML.
     """
+
     def __init__(self):
-        fields = [
-            {'name': 'Front'},
-            {'name': 'Back'},
-        ]
+        fields = [{"name": "Front"}, {"name": "Back"}]
         templates = [
             {
-                'name': 'ts_table',
-                'qfmt': "\n".join([
-                  '<div class="card">',
-                  '<div class="card-content">',
-                  '',
-                  '{{Front}}',
-                  '',
-                  '</div>',
-                  '</div>'
-                ]),
-                'afmt': "\n".join([
-                  '<div class="card">',
-                  '<div class="card-content">',
-                  '',
-                  '{{Back}}',
-                  '',
-                  '</div>',
-                  '</div>'
-                ])
+                "name": "ts_table",
+                "qfmt": "\n".join(
+                    [
+                        RANDOMIZE_TABLE_COLUMS_QUESTION_SCRIPT,
+                        '<div class="card">',
+                        '<div class="card-content">',
+                        "",
+                        "{{Front}}",
+                        "",
+                        "</div>",
+                        "</div>",
+                    ]
+                ),
+                "afmt": "\n".join(
+                    [
+                        RANDOMIZE_TABLE_COLUMS_ANSWER_SCRIPT,
+                        '<div class="card">',
+                        '<div class="card-content">',
+                        "",
+                        "{{Back}}",
+                        "",
+                        "</div>",
+                        "</div>",
+                    ]
+                ),
             }
         ]
         # You can add note-type–specific CSS here if desired.
@@ -159,4 +312,10 @@ table tr td:last-child {
 }
         """
         # Ensure the model ID is unique.
-        super().__init__(model_id=1607392319, name='ts_basic', fields=fields, templates=templates, css=specific_css)
+        super().__init__(
+            model_id=1607392319,
+            name="ts_table",
+            fields=fields,
+            templates=templates,
+            css=specific_css,
+        )
