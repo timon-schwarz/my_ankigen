@@ -18,6 +18,8 @@ class TableMaskerHiddenVectors(Masker):
 
             # Generate masked table for each row.
             for masked_row_idx in range(num_rows):
+                if masked_row_idx == 0 and not mask_col_headers:
+                    continue
                 unmasked_table: List[List[str]] = []
                 masked_table: List[List[str]] = []
                 for row_idx in range(num_rows):
@@ -26,14 +28,10 @@ class TableMaskerHiddenVectors(Masker):
                     for col_idx in range(num_cols):
                         cell_content = table[row_idx][col_idx]
                         if row_idx == masked_row_idx and col_idx != 0:
-                            if row_idx != 0 or mask_col_headers:
-                                unmasked = styler.get_unmasked(cell_content)
-                                masked = styler.get_masked(cell_content)
-                                unmasked_row_cells.append(unmasked)
-                                masked_row_cells.append(masked)
-                            else:
-                                unmasked_row_cells.append(cell_content)
-                                masked_row_cells.append(cell_content)
+                            unmasked = styler.get_unmasked(cell_content)
+                            masked = styler.get_masked(cell_content)
+                            unmasked_row_cells.append(unmasked)
+                            masked_row_cells.append(masked)
                         else:
                             unmasked_row_cells.append(cell_content)
                             masked_row_cells.append(cell_content)
@@ -44,6 +42,8 @@ class TableMaskerHiddenVectors(Masker):
 
             # Generate masked table for each column.
             for masked_col_idx in range(num_cols):
+                if masked_col_idx == 0 and not mask_row_headers:
+                    continue
                 unmasked_table: List[List[str]] = []
                 masked_table: List[List[str]] = []
                 for row_idx in range(num_rows):
@@ -52,14 +52,13 @@ class TableMaskerHiddenVectors(Masker):
                     for col_idx in range(num_cols):
                         cell_content = table[row_idx][col_idx]
                         if col_idx == masked_col_idx and row_idx != 0:
-                            if col_idx != 0 or mask_row_headers:
-                                unmasked = styler.get_unmasked(cell_content)
-                                masked = styler.get_masked(cell_content)
-                                unmasked_row_cells.append(unmasked)
-                                masked_row_cells.append(masked)
-                            else:
-                                unmasked_row_cells.append(cell_content)
-                                masked_row_cells.append(cell_content)
+                            unmasked = styler.get_unmasked(cell_content)
+                            masked = styler.get_masked(cell_content)
+                            unmasked_row_cells.append(unmasked)
+                            masked_row_cells.append(masked)
+                        else:
+                            unmasked_row_cells.append(cell_content)
+                            masked_row_cells.append(cell_content)
                     unmasked_table.append(unmasked_row_cells)
                     masked_table.append(masked_row_cells)
                 unmasked_tables.append(unmasked_table)

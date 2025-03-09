@@ -94,12 +94,6 @@ def generate_flashcards(flashcards_folder: str) -> List[Flashcard]:
             )
             continue
 
-        if shuffle_cols and shuffle_rows:
-            logging.warning(
-                f"'shuffle_cols' and 'shuffle_rows' is both true in file '{md_file}', which does not make sense. Skipping file."
-            )
-            continue
-
         hints = note_metadata.get("hints")
         if not isinstance(hints, list):
             if isinstance(hints, str):
@@ -119,7 +113,7 @@ def generate_flashcards(flashcards_folder: str) -> List[Flashcard]:
             shuffle_cols=shuffle_cols,
             shuffle_rows=shuffle_rows,
         )
-        flashcards = processor.process(content, note_metadata)
+        flashcards.extend(processor.process(content, note_metadata))
 
     return flashcards
 

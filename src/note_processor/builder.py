@@ -1,4 +1,5 @@
 from typing import List
+from deck_builder.note_type_table_shuffled_vectors import TableNoteTypeShuffledVectors
 from models.models import Flashcard, NoteMetadata, FlashcardMetadata
 from note_processor import styler
 from deck_builder.note_type_table import TableNoteType
@@ -23,9 +24,11 @@ def build(
         back = styler.add_hints(note_metadata.hints, back)
 
         note_type = TableNoteType()
-        if note_metadata.shuffle_cols:
+        if note_metadata.shuffle_cols and note_metadata.shuffle_rows:
+            note_type = TableNoteTypeShuffledVectors()
+        elif note_metadata.shuffle_cols:
             note_type = TableNoteTypeShuffledCols()
-        if note_metadata.shuffle_rows:
+        elif note_metadata.shuffle_rows:
             note_type = TableNoteTypeShuffledRows()
 
         flashcard_metadata = FlashcardMetadata(
