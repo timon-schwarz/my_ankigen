@@ -5,7 +5,7 @@ from note_processor.table_masker_hidden_vectors import TableMaskerHiddenVectors
 
 def get_masker(masker: str) -> Masker:
     """Return an instance of the appropriate masker based on the provided string."""
-    if masker == "table_hidden_vectors":
+    if masker == "vectors":
         return TableMaskerHiddenVectors()
     return None
 

@@ -43,8 +43,7 @@ def build_anki_package(
 
         for card in cards:
             # Instantiate the note type class for this card.
-            note_type_instance = card.metadata.note_type()
-            model = note_type_instance.create_model()
+            model = card.metadata.note_type.create_model()
 
             note = genanki.Note(
                 guid=card.metadata.id, model=model, fields=[card.front, card.back]

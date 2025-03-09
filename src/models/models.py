@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List
-from deck_builder.note_types import BaseNoteType
+from deck_builder.note_type_base import BaseNoteType
+from note_processor.abstracts import Masker, Parser
 
 
 @dataclass(slots=True, kw_only=True)
@@ -8,8 +9,12 @@ class NoteMetadata:
     id: str
     name: str
     deck: str
-    parser: str
-    masker: str
+    parser: Parser
+    masker: Masker
+    mask_row_header: bool
+    mask_col_header: bool
+    shuffle_rows: bool
+    shuffle_cols: bool
     hints: List[str] = field(default_factory=list)
 
 
@@ -17,6 +22,8 @@ class NoteMetadata:
 class FlashcardMetadata:
     id: str
     deck: str
+    shuffle_rows: bool
+    shuffle_cols: bool
     note_type: BaseNoteType
 
 

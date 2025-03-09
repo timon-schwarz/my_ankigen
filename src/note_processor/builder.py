@@ -1,7 +1,9 @@
 from typing import List
 from models.models import Flashcard, NoteMetadata, FlashcardMetadata
 from note_processor import styler
-from deck_builder.note_types import TableNoteType
+from deck_builder.note_type_table import TableNoteType
+from deck_builder.note_type_table_shuffled_cols import TableNoteTypeShuffledCols
+from deck_builder.note_type_table_shuffled_rows import TableNoteTypeShuffledRows
 
 
 def build(
@@ -20,11 +22,18 @@ def build(
         back = styler.add_card_header(note_metadata.name, back)
         back = styler.add_hints(note_metadata.hints, back)
 
-        # TODO: Differentiate note types
+        note_type = TableNoteType()
+        if note_metadata.shuffle_cols:
+            note_type = TableNoteTypeShuffledCols()
+        if note_metadata.shuffle_rows:
+            note_type = TableNoteTypeShuffledRows()
+
         flashcard_metadata = FlashcardMetadata(
             id=note_metadata.id + f"-{counter}",
             deck=note_metadata.deck,
-            note_type=TableNoteType,
+            shuffle_rows=note_metadata.shuffle_rows,
+            shuffle_cols=note_metadata.shuffle_cols,
+            note_type=note_type,
         )
         cards.append(Flashcard(front=front, back=back, metadata=flashcard_metadata))
         counter += 1

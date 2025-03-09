@@ -1,7 +1,7 @@
 import unittest
-from parser.ts_table_parser import TsTableParser
+from parser.parser_table import TsTableParser
 from parser.models import Flashcard, FlashcardMetadata
-from parser.mask_generator import RowColumnMaskGenerator
+from parser.masker_table_cloze_full import RowColumnMaskGenerator
 
 class TestTsTableParser(unittest.TestCase):
     def setUp(self):
@@ -90,7 +90,7 @@ class TestTsTableParser(unittest.TestCase):
     
     def test_parse_method_output(self):
         # Test the overall parse method.
-        metadata = FlashcardMetadata(unique_id="1-195322b0c4c-a1bc2", name="Test", note_type="ts_table", deck="TestDeck")
+        metadata = FlashcardMetadata(unique_id="1-195322b0c4c-a1bc2", name="Test", parser="ts_table", deck="TestDeck")
         flashcards = self.parser.parse(self.markdown_table, metadata)
         # For our table (3x3), expect 3 row masks + 3 column masks = 6 flashcards.
         self.assertEqual(len(flashcards), 6)
@@ -99,7 +99,7 @@ class TestTsTableParser(unittest.TestCase):
             self.assertTrue(card.front)
             self.assertTrue(card.back)
             self.assertTrue(card.metadata.name)
-            self.assertTrue(card.metadata.note_type)
+            self.assertTrue(card.metadata.parser)
             self.assertTrue(card.metadata.deck)
         # All flashcards should have the same full table as the answer.
         backs = {card.back for card in flashcards}

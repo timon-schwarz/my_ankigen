@@ -1,0 +1,44 @@
+/* Base card styling */
+.card {
+  font-family: "Century Gothic", sans-serif;
+  font-size: 16px;
+  color: #cad3f5; /* Text */
+  background-color: #24273a; /* Base */
+
+  /* Use Flexbox to center content vertically and horizontally */
+  display: flex;
+  justify-content: center; /* center horizontally */
+  align-items: center; /* center vertically */
+  min-height: 100vh;
+  min-width: 100vw;
+  margin: 0;
+  padding: 0;
+}
+
+/* A wrapper to constrain the content width and keep text left-aligned */
+.card-content {
+  margin: 20px;
+  width: auto; /* Let it shrink to fit content */
+  text-align: left;
+}
+
+.card_header {
+  color: #b7bdf8; /* Lavender */
+  font-size: 24px;
+  font-weight: bold;
+  display: table; /* Allows margin auto to center horizontally */
+  margin: 0 auto 32px auto; /* Center horizontally, plus bottom margin */
+  text-align: center; /* Center the header text itself */
+}
+
+.hints {
+  color: #b7bdf8; /* Lavender */
+  margin-top: 32px; /* Top margin */
+  white-space: pre-wrap;
+}
+
+.masked,
+.unmasked,
+.code {
+  font-family: "Inconsolata", monospace;
+}

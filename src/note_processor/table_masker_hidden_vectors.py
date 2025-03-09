@@ -5,7 +5,10 @@ from note_processor import styler
 
 class TableMaskerHiddenVectors(Masker):
     def mask(
-        self, tables: List[List[List[str]]]
+        self,
+        tables: List[List[List[str]]],
+        mask_row_headers: bool,
+        mask_col_headers: bool,
     ) -> Tuple[List[List[List[str]]], List[List[List[str]]]]:
         unmasked_tables: List[List[List[str]]] = []
         masked_tables: List[List[List[str]]] = []
@@ -21,15 +24,19 @@ class TableMaskerHiddenVectors(Masker):
                     unmasked_row_cells: List[str] = []
                     masked_row_cells: List[str] = []
                     for col_idx in range(num_cols):
-                        unmasked_cell = table[row_idx][col_idx]
+                        cell_content = table[row_idx][col_idx]
                         if row_idx == masked_row_idx and col_idx != 0:
-                            masked_cell = styler.get_masked(unmasked_cell)
-                            unmasked_cell = styler.get_unmasked(unmasked_cell)
-                            unmasked_row_cells.append(unmasked_cell)
-                            masked_row_cells.append(masked_cell)
+                            if row_idx != 0 or mask_col_headers:
+                                unmasked = styler.get_unmasked(cell_content)
+                                masked = styler.get_masked(cell_content)
+                                unmasked_row_cells.append(unmasked)
+                                masked_row_cells.append(masked)
+                            else:
+                                unmasked_row_cells.append(cell_content)
+                                masked_row_cells.append(cell_content)
                         else:
-                            unmasked_row_cells.append(unmasked_cell)
-                            masked_row_cells.append(unmasked_cell)
+                            unmasked_row_cells.append(cell_content)
+                            masked_row_cells.append(cell_content)
                     unmasked_table.append(unmasked_row_cells)
                     masked_table.append(masked_row_cells)
                 unmasked_tables.append(unmasked_table)
@@ -43,15 +50,16 @@ class TableMaskerHiddenVectors(Masker):
                     unmasked_row_cells: List[str] = []
                     masked_row_cells: List[str] = []
                     for col_idx in range(num_cols):
-                        unmasked_cell = table[row_idx][col_idx]
+                        cell_content = table[row_idx][col_idx]
                         if col_idx == masked_col_idx and row_idx != 0:
-                            masked_cell = styler.get_masked(unmasked_cell)
-                            unmasked_cell = styler.get_unmasked(unmasked_cell)
-                            unmasked_row_cells.append(unmasked_cell)
-                            masked_row_cells.append(masked_cell)
-                        else:
-                            unmasked_row_cells.append(unmasked_cell)
-                            masked_row_cells.append(unmasked_cell)
+                            if col_idx != 0 or mask_row_headers:
+                                unmasked = styler.get_unmasked(cell_content)
+                                masked = styler.get_masked(cell_content)
+                                unmasked_row_cells.append(unmasked)
+                                masked_row_cells.append(masked)
+                            else:
+                                unmasked_row_cells.append(cell_content)
+                                masked_row_cells.append(cell_content)
                     unmasked_table.append(unmasked_row_cells)
                     masked_table.append(masked_row_cells)
                 unmasked_tables.append(unmasked_table)

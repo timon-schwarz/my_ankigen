@@ -7,6 +7,7 @@ import dotenv
 from models.models import Flashcard, NoteMetadata
 from note_processor import processor
 from deck_builder import deck_builder
+from note_processor.abstracts_factory import get_masker, get_parser
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -27,7 +28,7 @@ def generate_flashcards(flashcards_folder: str) -> List[Flashcard]:
     """Process markdown files in the specified flashcards folder and generate flashcards from their metadata and content."""
     flashcards: List[Flashcard] = []
     for md_file in get_markdown_files(flashcards_folder):
-        with open(md_file, "r", encoding="utf-8") as f:
+        with open(md_file, "r") as f:
             fmatter = frontmatter.load(f)
 
         note_metadata = fmatter.metadata
@@ -49,17 +50,53 @@ def generate_flashcards(flashcards_folder: str) -> List[Flashcard]:
             )
             continue
 
-        parser = note_metadata.get("parser")
-        if not isinstance(parser, str):
+        parser_type = note_metadata.get("parser")
+        parser = get_parser(parser_type)
+        if not parser:
             logging.warning(
-                f"File '{md_file}' must have a 'parser' field of type str. Skipping file."
+                f"Parser '{parser_type}' in file '{md_file}' does not exist. Skipping file."
             )
             continue
 
-        masker = note_metadata.get("masker")
-        if not isinstance(masker, str):
+        masker_type = note_metadata.get("masker")
+        masker = get_masker(masker_type)
+        if not masker:
             logging.warning(
-                f"File '{md_file}' must have a 'masker' field of type str. Skipping file."
+                f"Masker '{masker_type}' in file '{md_file}' does not exist. Skipping file."
+            )
+            continue
+
+        mask_row_headers = note_metadata.get("mask_row_headers")
+        if (not isinstance(mask_row_headers, bool)) and mask_row_headers == None:
+            logging.warning(
+                f"'mask_rows' is specified in file '{md_file}' but '{mask_row_headers}' is not a bool. Skipping file."
+            )
+            continue
+
+        mask_col_headers = note_metadata.get("mask_col_headers")
+        if (not isinstance(mask_col_headers, bool)) and mask_col_headers == None:
+            logging.warning(
+                f"'mask_cols' is specified in file '{md_file}' but '{mask_col_headers}' is not a bool. Skipping file."
+            )
+            continue
+
+        shuffle_rows = note_metadata.get("shuffle_rows")
+        if (not isinstance(shuffle_rows, bool)) and shuffle_rows == None:
+            logging.warning(
+                f"'shuffle_rows' is specified in file '{md_file}' but '{shuffle_rows}' is not a bool. Skipping file."
+            )
+            continue
+
+        shuffle_cols = note_metadata.get("shuffle_cols")
+        if (not isinstance(shuffle_cols, bool)) and shuffle_cols == None:
+            logging.warning(
+                f"'shuffle_cols' is specified in file '{md_file}' but '{shuffle_cols}' is not a bool. Skipping file."
+            )
+            continue
+
+        if shuffle_cols and shuffle_rows:
+            logging.warning(
+                f"'shuffle_cols' and 'shuffle_rows' is both true in file '{md_file}', which does not make sense. Skipping file."
             )
             continue
 
@@ -71,7 +108,16 @@ def generate_flashcards(flashcards_folder: str) -> List[Flashcard]:
                 hints = []
 
         note_metadata = NoteMetadata(
-            id=id, name=name, deck=deck, parser=parser, masker=masker, hints=hints
+            id=id,
+            name=name,
+            deck=deck,
+            parser=parser,
+            masker=masker,
+            hints=hints,
+            mask_col_header=mask_col_headers,
+            mask_row_header=mask_row_headers,
+            shuffle_cols=shuffle_cols,
+            shuffle_rows=shuffle_rows,
         )
         flashcards = processor.process(content, note_metadata)
 
